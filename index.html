@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>penguin.music - real-time music visualizer and living art piece</title>
+    <meta
+      name="description"
+      content="Mr. Penguin listens with you. A free real-time music visualizer and living art piece, reacting to whatever plays from Spotify, YouTube, SoundCloud or your mic."
+    />
+    <meta name="theme-color" content="#06070d" />
+    <link rel="canonical" href="https://penguin.music/" />
+    <link rel="icon" type="image/svg+xml" href="ui/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="boot-cover" aria-hidden="true">
+      <div class="boot-view">
+        <img src="ui/boot_sign_station.webp" alt="" />
+        <img src="ui/boot_sign_soleil.webp" alt="" />
+      </div>
+      <div class="boot-bar"><i data-cover-bar></i></div>
+      <div class="boot-pct" data-cover-pct>0%</div>
+      <div class="boot-logo" data-boot-logo>
+        <svg viewBox="0 0 420 72" aria-label="penguin.music">
+          <text x="0" y="52" fill="#1a1a1c" font-family="Varela Round, ui-rounded, sans-serif" font-size="48">
+            penguin.music
+          </text>
+        </svg>
+      </div>
+    </div>
+
+    <div id="app">
+      <div id="phase1-host">
+        <div class="phase1-card">
+          <div class="scene-host" id="scene-host"></div>
+        </div>
+      </div>
+
+      <!-- DOM mirrored from penguin.music #public-ui -->
+      <div id="public-ui">
+        <div class="pui-logo" data-pui-logo>
+          <svg viewBox="0 0 420 72" aria-hidden="true">
+            <text
+              x="210"
+              y="52"
+              text-anchor="middle"
+              fill="#f2f4f8"
+              font-family="Varela Round, ui-rounded, sans-serif"
+              font-size="48"
+            >
+              penguin.music
+            </text>
+          </svg>
+        </div>
+
+        <div class="pui-top" data-pui-top>
+          <div class="pui-searchbar" data-pui-searchbar>
+            <input
+              type="text"
+              data-pui-search-input
+              spellcheck="false"
+              autocomplete="off"
+              aria-label="search and play a song"
+            />
+            <span class="pui-search-ghost" data-pui-search-ghost aria-hidden="true"></span>
+            <span class="pui-search-hint">search and play anything or paste a url</span>
+            <button class="pui-round pui-round-sm" data-pui="search-go" title="search and play" type="button">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M20 20l-3.6-3.6" />
+              </svg>
+            </button>
+            <span class="pui-search-note" data-pui-search-note hidden></span>
+          </div>
+
+          <div class="pui-sources" data-pui-sources>
+            <span class="pui-sources-label">or listen from</span>
+            <button class="pui-chip-src" data-pui="src-spotify" type="button">spotify</button>
+            <button class="pui-chip-src" data-pui="src-youtube" type="button">youtube</button>
+            <button class="pui-chip-src" data-pui="src-speaker" type="button">microphone</button>
+            <button class="pui-chip-src" data-pui="src-demo" type="button">demo</button>
+            <div class="pui-src-stoprow" data-pui-station-stop hidden>
+              <button class="pui-chip-src pui-src-stop" data-pui="stop" type="button">stop playing</button>
+            </div>
+          </div>
+
+          <div class="pui-micmode" data-pui-micmode hidden>
+            <span class="pui-sources-label">the mic is hearing</span>
+            <button class="pui-chip-src is-on" data-pui="mic-speaker" type="button">external speaker</button>
+            <button class="pui-chip-src" data-pui="mic-live" type="button">live instrument</button>
+          </div>
+
+          <div class="pui-live" data-pui-live hidden>
+            <span class="pui-live-label" data-pui-live-label>sharing audio</span>
+            <button class="pui-pill pui-pill-sm" data-pui="stop" data-pui-stop-btn type="button">stop sharing</button>
+          </div>
+        </div>
+
+        <div class="pui-stations" data-pui-stations>
+          <p class="pui-stations-title">pick a station</p>
+          <div class="pui-stations-row">
+            <button class="pui-stations-arrow" data-pui="stations-left" title="more stations" type="button" aria-label="previous stations">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="pui-stations-grid" data-pui-stations-grid>
+              <button class="pui-station is-on" data-pui="station" data-station="today" type="button">today's selection</button>
+              <button class="pui-station" data-pui="station" data-station="arcade" type="button">8-bit core</button>
+              <button class="pui-station" data-pui="station" data-station="lofi" type="button">lofi beats</button>
+              <button class="pui-station" data-pui="station" data-station="jazz" type="button">soulful jazz</button>
+              <button class="pui-station" data-pui="station" data-station="deepwork" type="button">deep work music</button>
+              <button class="pui-station" data-pui="station" data-station="nightdrive" type="button">night drive</button>
+              <button class="pui-station" data-pui="station" data-station="house" type="button">house party</button>
+              <button class="pui-station" data-pui="station" data-station="808s" type="button">808s & beats</button>
+              <button class="pui-station pui-station-boiler" data-pui="station-boiler" data-station="boiler" aria-disabled="true" type="button">boiler room</button>
+            </div>
+            <button class="pui-stations-arrow" data-pui="stations-right" title="more stations" type="button" aria-label="next stations">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="pui-guide" data-pui-guide hidden>
+          <div class="pui-guide-card pui-g2">
+            <button class="pui-x pui-x-plain pui-g2-x" data-pui="guide-back" title="close" aria-label="close" type="button">×</button>
+            <h3 data-g2-title>how to use this app</h3>
+            <div data-g2-body>
+              <ol class="pui-guide-steps">
+                <li><b>Drag</b> the scene to orbit the hero a full <b>360°</b>.</li>
+                <li>Tap <b>demo</b> to play <b>Faded</b> by Alan Walker.</li>
+                <li>Tap <b>microphone</b> to react to music in your room.</li>
+                <li>Pick a <b>station</b>; trains pass on their own.</li>
+                <li>Open <b>settings</b> for turntable spin.</li>
+              </ol>
+            </div>
+            <p class="pui-g2-note" data-g2-note>Tip: enable Turntable in settings for hands-free 360°.</p>
+            <div class="pui-guide-row">
+              <button class="pui-pill pui-pill-primary" data-pui="guide-go" type="button">got it</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="pui-dock-chip" data-pui="dock-chip" title="open the controller" aria-label="open the controller" type="button" hidden></button>
+
+        <button class="pui-guide-btn" data-pui="guide-open" title="how to use" type="button">Guide</button>
+
+        <button class="pui-gear" data-pui="settings" title="settings" aria-label="settings" aria-expanded="false" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3.2" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+
+        <div class="pui-radio-bar" data-pui-radio-bar hidden>
+          <div class="pui-pill-tab">
+            <span class="pui-wave" data-pui-wave aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            <span class="pui-radio-station" data-pui-radio-station></span>
+          </div>
+          <div class="pui-pill-main">
+            <span class="pui-radio-artist" data-pui-radio-artist></span>
+            <span class="pui-pill-title"><span class="pui-radio-song" data-pui-radio-song></span></span>
+            <span class="pui-pill-right">
+              <span class="pui-radio-controls">
+                <button class="pui-radio-btn" data-pui="radio-toggle" title="pause" type="button">❚❚</button>
+              </span>
+            </span>
+            <span class="pui-pill-progress"><i data-pui-progress></i></span>
+          </div>
+        </div>
+
+        <div class="pui-now" data-pui-now hidden>
+          <span class="pui-now-text" data-pui-now-text></span>
+          <button class="pui-now-x" data-pui="stop" title="stop" type="button">×</button>
+        </div>
+
+        <div class="pui-device" data-pui-device>
+          <div class="pui-device-art" data-pui-device-art aria-hidden="true"></div>
+          <div class="pui-tape" data-pui-tape>
+            <div class="pui-tape-idle" data-tape="idle">
+              Meet the hero. Headphones on,<br />waiting for Faded on the platform.
+            </div>
+            <div class="pui-tape-listening" data-tape="listening" hidden>
+              <span class="pui-ear">🎧</span> <span data-pui-listening-word>listening</span><span class="pui-dots"><i>.</i><i>.</i><i>.</i></span>
+            </div>
+            <div class="pui-tape-listening" data-tape="searching" hidden>
+              <span class="pui-ear">🔎</span> <span data-pui-searching-for>finding it</span><span class="pui-dots"><i>.</i><i>.</i><i>.</i></span>
+            </div>
+            <div class="pui-tape-detected" data-tape="detected" hidden>
+              <div class="pui-chip">song detected</div>
+              <div class="pui-song" data-pui-song></div>
+              <div class="pui-artist" data-pui-artist></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="view-controls">
+          <button type="button" data-pui="turntable-quick" title="toggle turntable" aria-label="toggle turntable">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="8" />
+              <path d="M12 8v4l2.5 1.5" stroke-linecap="round" />
+            </svg>
+          </button>
+          <button type="button" data-pui="reset-cam" title="reset camera" aria-label="reset camera">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M3 12a9 9 0 1 0 3-6.7" stroke-linecap="round" />
+              <path d="M3 4v5h5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button type="button" data-pui="fullscreen" title="fullscreen" aria-label="fullscreen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="pui-toasts" data-pui-toasts aria-live="polite"></div>
+
+      <div class="pui-settings-scrim" data-pui-settings hidden>
+        <div class="pui-settings pui-s2" role="dialog" aria-modal="true">
+          <button class="pui-x pui-settings-x" data-pui="settings-close" type="button" aria-label="close">×</button>
+          <div class="pui-s2-logo">penguin.music</div>
+          <p class="pui-s2-lead">3D station sample — drag for 360° orbit, Demo plays Faded, hero reacts to audio.</p>
+          <label class="settings-row">
+            <span>turntable 360°</span>
+            <input type="checkbox" data-turntable-toggle />
+          </label>
+          <label class="settings-row">
+            <span>train passes</span>
+            <input type="checkbox" checked data-train-toggle />
+          </label>
+          <label class="settings-row">
+            <span>cursor look</span>
+            <input type="checkbox" checked data-look-toggle />
+          </label>
+          <p class="pui-s2-credit">
+            Character from your uploaded art. Demo audio is local Faded for personal sample use only.
+            Drag the scene to orbit; enable turntable for auto-spin.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
